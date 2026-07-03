@@ -215,31 +215,34 @@
         <button id="addTaskBtn">Add Task</button>
     </div>
     <div id="taskListContainer">
-        <p class="empty-message" id="emptyMessage">No tasks yet.</p>
+        <p class="empty-message" id="emptyMessage">No tasks yet. Add one above!</p>
     </div>
 </div>
 <script>
-    let tasks = [];
-    let editingTaskId = null;
-    let nextTaskId = 1;
-    const taskNameInput = document.getElementById('taskNameInput');
-    const taskDateTime = document.getElementById('taskDateTime');
-    const addTaskBtn = document.getElementById('addTaskBtn');
-    const taskListContainer = document.getElementById('taskListContainer');
-    const emptyMessage = document.getElementById('emptyMessage');
-    const dateError = document.getElementById('dateError');
+    var tasks = [];
+    var editingTaskId = null;
+    var nextTaskId = 1;
+    var taskNameInput = document.getElementById('taskNameInput');
+    var taskDateTime = document.getElementById('taskDateTime');
+    var addTaskBtn = document.getElementById('addTaskBtn');
+    var taskListContainer = document.getElementById('taskListContainer');
+    var emptyMessage = document.getElementById('emptyMessage');
+    var dateError = document.getElementById('dateError');
+
     taskDateTime.value = '';
+
     function isValidDate(dateValue) {
         if (!dateValue) return true;
-        const selectedDate = new Date(dateValue);
-        const currentDate = new Date();
-        const selectedYear = selectedDate.getFullYear();
-        const currentYear = currentDate.getFullYear();
+        var selectedDate = new Date(dateValue);
+        var currentDate = new Date();
+        var selectedYear = selectedDate.getFullYear();
+        var currentYear = currentDate.getFullYear();
         if (selectedYear < currentYear) return false;
         return true;
     }
+
     function validateDateInput() {
-        const dateValue = taskDateTime.value;
+        var dateValue = taskDateTime.value;
         if (dateValue && !isValidDate(dateValue)) {
             dateError.style.display = 'block';
             return false;
@@ -248,123 +251,158 @@
             return true;
         }
     }
+
     taskDateTime.addEventListener('change', validateDateInput);
     taskDateTime.addEventListener('input', function() {
         dateError.style.display = 'none';
     });
+
     function renderTasks() {
-        const items = taskListContainer.querySelectorAll('.task-item');
-        items.forEach(el => el.remove());
+        var items = taskListContainer.querySelectorAll('.task-item');
+        for (var i = 0; i < items.length; i++) {
+            items[i].remove();
+        }
+
         if (tasks.length === 0) {
             emptyMessage.style.display = 'block';
             return;
         }
         emptyMessage.style.display = 'none';
-        tasks.forEach(task => {
-            const taskDiv = document.createElement('div');
+
+        for (var j = 0; j < tasks.length; j++) {
+            var task = tasks[j];
+            var taskDiv = document.createElement('div');
             taskDiv.className = 'task-item';
             taskDiv.dataset.taskId = task.id;
+
             if (editingTaskId === task.id) {
-                taskDiv.appendChild(createEditForm(task));
+                var editForm = createEditForm(task);
+                taskDiv.appendChild(editForm);
             } else {
-                taskDiv.appendChild(createTaskView(task));
+                var view = createTaskView(task);
+                taskDiv.appendChild(view);
             }
             taskListContainer.appendChild(taskDiv);
-        });
+        }
     }
+
     function createTaskView(task) {
-        const frag = document.createDocumentFragment();
-        const row = document.createElement('div');
+        var frag = document.createDocumentFragment();
+
+        var row = document.createElement('div');
         row.className = 'task-row';
-        const checkbox = document.createElement('input');
+
+        var checkbox = document.createElement('input');
         checkbox.type = 'checkbox';
         checkbox.checked = task.done;
         checkbox.addEventListener('change', function() {
             toggleTaskDone(task.id);
         });
-        const nameSpan = document.createElement('span');
+
+        var nameSpan = document.createElement('span');
         nameSpan.className = 'task-name';
         if (task.done) nameSpan.classList.add('done');
         nameSpan.textContent = task.name;
-        const dueSpan = document.createElement('span');
+
+        var dueSpan = document.createElement('span');
         dueSpan.className = 'task-due';
         if (task.due) {
-            const d = new Date(task.due);
-            const options = { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+            var d = new Date(task.due);
+            var options = { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
             dueSpan.textContent = d.toLocaleString('en-US', options);
         } else {
             dueSpan.textContent = 'No due';
         }
+
         row.appendChild(checkbox);
         row.appendChild(nameSpan);
         row.appendChild(dueSpan);
-        const actionsDiv = document.createElement('div');
+
+        var actionsDiv = document.createElement('div');
         actionsDiv.className = 'actions';
-        const editBtn = document.createElement('button');
+
+        var editBtn = document.createElement('button');
         editBtn.className = 'edit-btn';
         editBtn.textContent = 'Edit';
         editBtn.addEventListener('click', function() {
             startEditing(task.id);
         });
-        const deleteBtn = document.createElement('button');
+
+        var deleteBtn = document.createElement('button');
         deleteBtn.className = 'delete-btn';
         deleteBtn.textContent = 'Delete';
         deleteBtn.addEventListener('click', function() {
             deleteTask(task.id);
         });
+
         actionsDiv.appendChild(editBtn);
         actionsDiv.appendChild(deleteBtn);
+
         frag.appendChild(row);
         frag.appendChild(actionsDiv);
         return frag;
     }
+
     function createEditForm(task) {
-        const frag = document.createDocumentFragment();
-        const container = document.createElement('div');
+        var frag = document.createDocumentFragment();
+        var container = document.createElement('div');
         container.className = 'edit-inline';
-        const nameInput = document.createElement('input');
+
+        var nameInput = document.createElement('input');
         nameInput.type = 'text';
         nameInput.value = task.name;
         nameInput.id = 'editNameInput';
-        const dueInput = document.createElement('input');
+
+        var dueInput = document.createElement('input');
         dueInput.type = 'datetime-local';
         dueInput.value = task.due || '';
         dueInput.id = 'editDueInput';
-        const editActions = document.createElement('div');
+
+        var editActions = document.createElement('div');
         editActions.className = 'edit-actions';
-        const saveBtn = document.createElement('button');
+
+        var saveBtn = document.createElement('button');
         saveBtn.className = 'save-btn';
         saveBtn.textContent = 'Save';
         saveBtn.addEventListener('click', function() {
             saveEdit(task.id);
         });
-        const cancelBtn = document.createElement('button');
+
+        var cancelBtn = document.createElement('button');
         cancelBtn.className = 'cancel-btn';
         cancelBtn.textContent = 'Cancel';
         cancelBtn.addEventListener('click', function() {
             cancelEditing();
         });
+
         editActions.appendChild(saveBtn);
         editActions.appendChild(cancelBtn);
         container.appendChild(nameInput);
         container.appendChild(dueInput);
         container.appendChild(editActions);
         frag.appendChild(container);
-        setTimeout(() => nameInput.focus(), 50);
+
+        setTimeout(function() {
+            nameInput.focus();
+        }, 50);
+
         return frag;
     }
+
     function addTask() {
-        const name = taskNameInput.value.trim();
+        var name = taskNameInput.value.trim();
         if (name === '') {
             alert('Please enter a task name.');
             return;
         }
-        const due = taskDateTime.value || null;
+
+        var due = taskDateTime.value || null;
         if (due && !isValidDate(due)) {
             dateError.style.display = 'block';
             return;
         }
-        const newTask = {
+
+        var newTask = {
             id: nextTaskId++,
             name: name,
             due: due,
@@ -376,55 +414,80 @@
         dateError.style.display = 'none';
         renderTasks();
     }
+
     function toggleTaskDone(taskId) {
-        const task = tasks.find(t => t.id === taskId);
-        if (task) {
-            task.done = !task.done;
-            renderTasks();
+        for (var i = 0; i < tasks.length; i++) {
+            if (tasks[i].id === taskId) {
+                tasks[i].done = !tasks[i].done;
+                break;
+            }
         }
+        renderTasks();
     }
+
     function deleteTask(taskId) {
         if (!confirm('Delete this task?')) return;
-        const index = tasks.findIndex(t => t.id === taskId);
-        if (index !== -1) {
-            tasks.splice(index, 1);
-            if (editingTaskId === taskId) cancelEditing();
-            renderTasks();
+        for (var i = 0; i < tasks.length; i++) {
+            if (tasks[i].id === taskId) {
+                tasks.splice(i, 1);
+                break;
+            }
         }
+        if (editingTaskId === taskId) {
+            editingTaskId = null;
+        }
+        renderTasks();
     }
+
     function startEditing(taskId) {
-        if (editingTaskId !== null) cancelEditing();
+        if (editingTaskId !== null) {
+            cancelEditing();
+        }
         editingTaskId = taskId;
         renderTasks();
     }
+
     function saveEdit(taskId) {
-        const task = tasks.find(t => t.id === taskId);
+        var task = null;
+        for (var i = 0; i < tasks.length; i++) {
+            if (tasks[i].id === taskId) {
+                task = tasks[i];
+                break;
+            }
+        }
         if (!task) return;
-        const nameInput = document.getElementById('editNameInput');
-        const dueInput = document.getElementById('editDueInput');
-        const newName = nameInput.value.trim();
+
+        var nameInput = document.getElementById('editNameInput');
+        var dueInput = document.getElementById('editDueInput');
+        var newName = nameInput.value.trim();
+
         if (newName === '') {
             alert('Task name cannot be empty.');
             return;
         }
-        const newDue = dueInput.value || null;
+
+        var newDue = dueInput.value || null;
         if (newDue && !isValidDate(newDue)) {
             alert('Please select a valid date (current or future year only)');
             return;
         }
+
         task.name = newName;
         task.due = newDue;
         editingTaskId = null;
         renderTasks();
     }
+
     function cancelEditing() {
         editingTaskId = null;
         renderTasks();
     }
+
     addTaskBtn.addEventListener('click', addTask);
     taskNameInput.addEventListener('keydown', function(e) {
         if (e.key === 'Enter') addTask();
     });
+
     renderTasks();
 </script>
 </body>
